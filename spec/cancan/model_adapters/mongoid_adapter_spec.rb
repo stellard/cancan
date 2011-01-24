@@ -11,6 +11,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
     include Mongoid::Document
 
     referenced_in :mongoid_category
+    field :id_array, :type => Array
   end
 
   Mongoid.configure do |config|
@@ -66,6 +67,14 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         dude  = MongoidProject.create(:title => 'Dude')
 
         MongoidProject.accessible_by(@ability, :read).entries.should == [sir, lord, dude]
+      end
+      
+      it "should match when condition is on an array field" do
+        id = BSON::ObjectId.new
+        model = MongoidProject.create :id_array => [id, BSON::ObjectId.new]
+        
+        @ability.can :show, MongoidProject, :id_array => id
+        @ability.should be_able_to(:show, model)
       end
 
 
